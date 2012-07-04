@@ -23,11 +23,11 @@ public class GroundOverlay extends Overlay {
 		Color.MAGENTA
 	};
 	private final int cellRadius = 4;
+	private final int transparency = 128;
 	
 	private ArrayList<Cell> cells = new ArrayList<Cell>();
 	
 	public GroundOverlay() {
-		
 	}
 	
 	@Override
@@ -57,6 +57,7 @@ public class GroundOverlay extends Overlay {
 			}
 			
 			paint.setColor(color);
+			paint.setAlpha(transparency);
 			canvas.drawRect(p.x - cellRadius, p.y - cellRadius, p.x + cellRadius, p.y + cellRadius, paint);
 		}
 	}
