@@ -15,6 +15,12 @@ class LoginRequestData extends RequestData {
 	}
 }
 
+class MapRequestData extends RequestData {
+	MapRequestData() {
+		super("map");
+	}
+}
+
 class ResponseData {
 	String kind;
 	ResponseData() {
@@ -23,6 +29,12 @@ class ResponseData {
 
 class LoginResponseData extends ResponseData {
 	LoginResponseData() {
+	}
+}
+
+class MapResponseData extends ResponseData {
+	double[][] map;
+	MapResponseData() {
 	}
 }
 

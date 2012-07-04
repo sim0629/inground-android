@@ -24,13 +24,14 @@ public class IngroundActivity extends MapActivity {
 	private final IngroundActivity me = this;
 	private GroundOverlay ground;
 	private Network network;
+	private MapView mapView;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        MapView mapView = (MapView)findViewById(R.id.mapView);
+        mapView = (MapView)findViewById(R.id.mapView);
         mapView.setBuiltInZoomControls(false);
         
         MapController mapController = mapView.getController();
@@ -48,7 +49,7 @@ public class IngroundActivity extends MapActivity {
 		boolean result = super.onCreateOptionsMenu(menu);
 		menu.add(Menu.NONE, 1, 1, "login").setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
-				me.login();
+				me.doLogin();
 				return true;
 			}
 		});
@@ -60,7 +61,7 @@ public class IngroundActivity extends MapActivity {
 		return false;
 	}
 	
-	public void login() {
+	private void doLogin() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle("Log in");
 		alert.setMessage("Input your name");
@@ -80,6 +81,7 @@ public class IngroundActivity extends MapActivity {
 						@SuppressWarnings("unused")
 						LoginResponseData data = new Gson().fromJson(response, LoginResponseData.class);
 						Toast.makeText(me, "Login Succeeded", Toast.LENGTH_SHORT).show();
+						me.doMap();
 					}
 					@Override
 					public void onFailure(Throwable error, String content) {
@@ -101,5 +103,21 @@ public class IngroundActivity extends MapActivity {
 			}
 		});
 		alert.show();
+	}
+
+	private void doMap() {
+		network.post(new MapRequestData(), new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				MapResponseData data = new Gson().fromJson(response, MapResponseData.class);
+				double[][] map = data.map;
+				for(int i = 0; i < map.length; i++) {
+					if(map[i].length < 2) continue; // TODO
+					ground.addCell(map[i][0], map[i][1]);
+				}
+				mapView.invalidate();
+				Toast.makeText(me, "Map Loaded", Toast.LENGTH_SHORT).show();
+			}
+		});
 	}
 }

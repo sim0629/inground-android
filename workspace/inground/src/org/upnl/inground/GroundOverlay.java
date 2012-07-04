@@ -22,6 +22,7 @@ public class GroundOverlay extends Overlay {
 		Color.YELLOW,
 		Color.MAGENTA
 	};
+	private final int cellRadius = 4;
 	
 	private ArrayList<Cell> cells = new ArrayList<Cell>();
 	
@@ -37,7 +38,6 @@ public class GroundOverlay extends Overlay {
 		
 		Projection projection = mapView.getProjection();
 		Paint paint = new Paint();
-		paint.setStyle(Paint.Style.FILL);
 		
 		for(int i = 0; i < cells.size(); i++) {
 			Cell cell = cells.get(i);
@@ -48,14 +48,16 @@ public class GroundOverlay extends Overlay {
 			int who = cell.getWho();
 			int color = Color.BLACK;
 			if(who == Cell.NONE) {
+				paint.setStyle(Paint.Style.STROKE);
 				color = Color.GRAY;
 			}else {
+				paint.setStyle(Paint.Style.FILL);
 				if(who >= 0 && who < colors.length)
 					color = colors[who];
 			}
 			
 			paint.setColor(color);
-			canvas.drawPoint(p.x, p.y, paint);
+			canvas.drawRect(p.x - cellRadius, p.y - cellRadius, p.x + cellRadius, p.y + cellRadius, paint);
 		}
 	}
 	
