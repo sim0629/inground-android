@@ -35,7 +35,6 @@ public class IngroundActivity extends MapActivity {
         mapView.setBuiltInZoomControls(false);
         
         MapController mapController = mapView.getController();
-        mapController.setCenter(new GeoPoint(37459220, 126956145));
         mapController.setZoom(19);
         
         List<Overlay> mapOverlays = mapView.getOverlays();
@@ -111,11 +110,17 @@ public class IngroundActivity extends MapActivity {
 			public void onSuccess(String response) {
 				MapResponseData data = new Gson().fromJson(response, MapResponseData.class);
 				double[][] map = data.map;
+				double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE, minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
 				for(int i = 0; i < map.length; i++) {
 					if(map[i].length < 2) continue; // TODO
-					ground.addCell(map[i][0], map[i][1]);
+					double lat = map[i][0], lng = map[i][1];
+					ground.addCell(lat, lng);
+					if(lat < minLat) minLat = lat;
+					else if(lat > maxLat) maxLat = lat;
+					if(lng < minLng) minLng = lng;
+					else if(lng > maxLng) maxLng = lng;
 				}
-				mapView.invalidate();
+				mapView.getController().setCenter(new GeoPoint((int)((minLat + maxLat) / 2 * 1E6), (int)((minLng + maxLng) / 2 * 1E6)));
 				Toast.makeText(me, "Map Loaded", Toast.LENGTH_SHORT).show();
 			}
 		});
