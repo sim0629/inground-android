@@ -32,6 +32,7 @@ public class IngroundActivity extends MapActivity {
 	private MapView mapView;
 	private MapController mapController;
 	private MyLocationOverlay myLocationOverlay;
+	private boolean started;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -154,13 +155,43 @@ public class IngroundActivity extends MapActivity {
 			public void onSuccess(String response) {
 				StartResponseData data = new Gson().fromJson(response, StartResponseData.class);
 				if(data != null && data.success) {
-					
+					started = true;
+					doPoll();
 				}
 				Toast.makeText(me, String.format("Start %s", String.valueOf(data.success)), Toast.LENGTH_SHORT).show();
 			}
 			@Override
 			public void onFailure(Throwable error, String content) {
 				me.onFailureHelper(error, content, "Start");
+			}
+		});
+	}
+	
+	private void doPoll() {
+		if(!started) return;
+		network.post(new PollRequestData(), new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				ResponseData abstractData = new Gson().fromJson(response, ResponseData.class);
+				if(abstractData == null) return; // TODO
+				if(abstractData.kind.equals("poll")) {
+					// TODO
+				}else if(abstractData.kind.equals("ground")) {
+					GroundResponseData data = new Gson().fromJson(response, GroundResponseData.class);
+					for(int i : data.ground) {
+						ground.setCell(i, data.account);
+					}
+					mapView.invalidate();
+				}else if(abstractData.kind.equals("finish")) {
+					// TODO
+				}else {
+					// TODO
+				}
+				doPoll();
+			}
+			@Override
+			public void onFailure(Throwable error, String content) {
+				me.onFailureHelper(error, content, "Poll");
 			}
 		});
 	}

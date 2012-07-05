@@ -26,6 +26,7 @@ public class GroundOverlay extends Overlay {
 	private final int transparency = 128;
 	
 	private ArrayList<Cell> cells = new ArrayList<Cell>();
+	private ArrayList<String> accounts = new ArrayList<String>();
 	
 	public GroundOverlay() {
 	}
@@ -64,6 +65,16 @@ public class GroundOverlay extends Overlay {
 	
 	public void addCell(double lat, double lng) {
 		cells.add(new Cell(new GeoPoint((int)(lat * 1E6), (int)(lng * 1E6))));
+	}
+	
+	public void setCell(int index, String account) {
+		if(index < 0 || index >= cells.size()) return; // TODO
+		int who = accounts.indexOf(account);
+		if(who < 0) {
+			accounts.add(account);
+			who = accounts.size() - 1;
+		}
+		cells.get(index).setWho(who);
 	}
 	
 }

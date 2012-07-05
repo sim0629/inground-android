@@ -29,6 +29,12 @@ class StartRequestData extends RequestData {
 	}
 }
 
+class PollRequestData extends RequestData {
+	PollRequestData() {
+		super("poll");
+	}
+}
+
 class ResponseData {
 	String kind;
 	ResponseData() {
@@ -49,6 +55,13 @@ class MapResponseData extends ResponseData {
 class StartResponseData extends ResponseData {
 	boolean success;
 	StartResponseData() {
+	}
+}
+
+class GroundResponseData extends ResponseData {
+	String account;
+	int[] ground;
+	GroundResponseData() {
 	}
 }
 
