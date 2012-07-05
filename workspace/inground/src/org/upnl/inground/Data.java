@@ -1,14 +1,14 @@
 package org.upnl.inground;
 
 class RequestData {
-	protected String kind;
+	String kind;
 	RequestData(String kind) {
 		this.kind = kind;
 	}
 }
 
 class LoginRequestData extends RequestData {
-	private String account;
+	String account;
 	LoginRequestData(String account) {
 		super("login");
 		this.account = account;
@@ -26,6 +26,22 @@ class StartRequestData extends RequestData {
 	StartRequestData(double lat, double lng) {
 		super("start");
 		this.location = new double[] { lat, lng };
+	}
+}
+
+class GrabRequestData extends RequestData {
+	double[] location;
+	GrabRequestData(double lat, double lng) {
+		super("grab");
+		this.location = new double[] { lat, lng };
+	}
+}
+
+class ThrowRequestData extends RequestData {
+	double[] velocity;
+	ThrowRequestData(double y, double x) {
+		super("throw");
+		this.velocity = new double[] { y, x };
 	}
 }
 
@@ -55,6 +71,19 @@ class MapResponseData extends ResponseData {
 class StartResponseData extends ResponseData {
 	boolean success;
 	StartResponseData() {
+	}
+}
+
+class GrabResponseData extends ResponseData {
+	boolean success;
+	GrabResponseData() {
+	}
+}
+
+class ThrowResponseData extends ResponseData {
+	boolean success;
+	double[] location;
+	ThrowResponseData() {
 	}
 }
 
