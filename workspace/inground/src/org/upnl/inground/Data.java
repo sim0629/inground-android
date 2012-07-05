@@ -21,6 +21,14 @@ class MapRequestData extends RequestData {
 	}
 }
 
+class StartRequestData extends RequestData {
+	double[] location;
+	StartRequestData(double lat, double lng) {
+		super("start");
+		this.location = new double[] { lat, lng };
+	}
+}
+
 class ResponseData {
 	String kind;
 	ResponseData() {
@@ -35,6 +43,12 @@ class LoginResponseData extends ResponseData {
 class MapResponseData extends ResponseData {
 	double[][] map;
 	MapResponseData() {
+	}
+}
+
+class StartResponseData extends ResponseData {
+	boolean success;
+	StartResponseData() {
 	}
 }
 

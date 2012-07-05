@@ -45,8 +45,8 @@ public class IngroundActivity extends MapActivity {
                 if(event.getPointerCount() > 1) {
                     return true;
                 }
-                return false; 
-			}
+                return false;
+            }
         });
 
         mapController = mapView.getController();
@@ -68,6 +68,12 @@ public class IngroundActivity extends MapActivity {
 		menu.add(Menu.NONE, 1, 1, "login").setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
 				me.doLogin();
+				return true;
+			}
+		});
+		menu.add(Menu.NONE, 1, 1, "start").setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				me.doStart();
 				return true;
 			}
 		});
@@ -98,14 +104,7 @@ public class IngroundActivity extends MapActivity {
 					}
 					@Override
 					public void onFailure(Throwable error, String content) {
-						ErrorResponseData data = new Gson().fromJson(content, ErrorResponseData.class);
-						String message = "";
-						if(data == null) {
-							message = error.toString();
-						}else {
-							message = data.message;
-						}
-						Toast.makeText(me, "Login Failed : " + message, Toast.LENGTH_SHORT).show();
+						me.onFailureHelper(error, content, "Login");
 					}
 				});
 			}
@@ -137,9 +136,46 @@ public class IngroundActivity extends MapActivity {
 				mapController.setCenter(new GeoPoint((int)((minLat + maxLat) / 2 * 1E6), (int)((minLng + maxLng) / 2 * 1E6)));
 				Toast.makeText(me, "Map Loaded", Toast.LENGTH_SHORT).show();
 			}
+			@Override
+			public void onFailure(Throwable error, String content) {
+				me.onFailureHelper(error, content, "Map");
+			}
 		});
 	}
-
+	
+	private void doStart() {
+		GeoPoint gp = myLocationOverlay.getMyLocation();
+		if(gp == null) {
+			Toast.makeText(me, "Null Location", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		network.post(new StartRequestData(gp.getLatitudeE6() / 1E6d, gp.getLongitudeE6() / 1E6d), new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				StartResponseData data = new Gson().fromJson(response, StartResponseData.class);
+				if(data != null && data.success) {
+					
+				}
+				Toast.makeText(me, String.format("Start %s", String.valueOf(data.success)), Toast.LENGTH_SHORT).show();
+			}
+			@Override
+			public void onFailure(Throwable error, String content) {
+				me.onFailureHelper(error, content, "Start");
+			}
+		});
+	}
+	
+	private void onFailureHelper(Throwable error, String content, String title) {
+		ErrorResponseData data = new Gson().fromJson(content, ErrorResponseData.class);
+		String message = "";
+		if(data == null) {
+			message = error.toString();
+		}else {
+			message = data.message;
+		}
+		Toast.makeText(me, String.format("%s Failed : %s", title, message), Toast.LENGTH_SHORT).show();
+	}
+	
     @Override
     protected void onResume() {
     	super.onResume();
