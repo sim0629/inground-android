@@ -65,6 +65,18 @@ class GroundResponseData extends ResponseData {
 	}
 }
 
+class FinishResponseData extends ResponseData {
+	FinishResultData[] result;
+	FinishResponseData() {
+	}
+	class FinishResultData {
+		String account;
+		int nofcells;
+		FinishResultData() {
+		}
+	}
+}
+
 class ErrorResponseData extends ResponseData {
 	String message;
 	ErrorResponseData() {
