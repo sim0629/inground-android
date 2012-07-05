@@ -6,16 +6,21 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
+import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,6 +30,8 @@ public class IngroundActivity extends MapActivity {
 	private GroundOverlay ground;
 	private Network network;
 	private MapView mapView;
+	private MapController mapController;
+	private MyLocationOverlay myLocationOverlay;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,16 +40,28 @@ public class IngroundActivity extends MapActivity {
         
         mapView = (MapView)findViewById(R.id.mapView);
         mapView.setBuiltInZoomControls(false);
-        
-        MapController mapController = mapView.getController();
+        mapView.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+                if(event.getPointerCount() > 1) {
+                    return true;
+                }
+                return false; 
+			}
+        });
+
+        mapController = mapView.getController();
         mapController.setZoom(19);
         
         List<Overlay> mapOverlays = mapView.getOverlays();
         mapOverlays.add(ground = new GroundOverlay());
+        myLocationOverlay = new MyLocationOverlay(this, mapView);
+        myLocationOverlay.enableMyLocation();
+        myLocationOverlay.enableCompass();
+        mapOverlays.add(myLocationOverlay);
         
         network = new Network("http://neria.kr:16330/", this);
     }
-
+    
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		boolean result = super.onCreateOptionsMenu(menu);
@@ -54,12 +73,7 @@ public class IngroundActivity extends MapActivity {
 		});
 		return result;
 	}
-	
-	@Override
-	protected boolean isRouteDisplayed() {
-		return false;
-	}
-	
+
 	private void doLogin() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle("Log in");
@@ -120,9 +134,34 @@ public class IngroundActivity extends MapActivity {
 					if(lng < minLng) minLng = lng;
 					else if(lng > maxLng) maxLng = lng;
 				}
-				mapView.getController().setCenter(new GeoPoint((int)((minLat + maxLat) / 2 * 1E6), (int)((minLng + maxLng) / 2 * 1E6)));
+				mapController.setCenter(new GeoPoint((int)((minLat + maxLat) / 2 * 1E6), (int)((minLng + maxLng) / 2 * 1E6)));
 				Toast.makeText(me, "Map Loaded", Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
+
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	myLocationOverlay.enableMyLocation();
+    	myLocationOverlay.enableCompass();
+    }
+    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	myLocationOverlay.disableMyLocation();
+    	myLocationOverlay.disableCompass();
+    }
+
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration config){ 
+	    super.onConfigurationChanged(config);
+	}
+
 }
