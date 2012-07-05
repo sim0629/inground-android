@@ -27,7 +27,7 @@ public class Network {
 		client.setCookieStore(cookieStore);
 		client.addHeader("Accept", "application/json");
 		client.addHeader("Content-type", "application/json");
-		client.setTimeout(60);
+		client.setTimeout(40 * 1000);
 	}
 	
 	public void post(RequestData requestData, AsyncHttpResponseHandler responseHandler) {
