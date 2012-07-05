@@ -83,7 +83,7 @@ public class IngroundActivity extends MapActivity {
 
 	private void doLogin() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		alert.setTitle("Log in");
+		alert.setTitle("Login");
 		alert.setMessage("Input your name");
 		final EditText name = new EditText(this);
 		name.setLines(1);
@@ -241,5 +241,22 @@ public class IngroundActivity extends MapActivity {
 	public void onConfigurationChanged(Configuration config){ 
 	    super.onConfigurationChanged(config);
 	}
-
+	
+	@Override
+	public void onBackPressed() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle("Exit");
+		alert.setMessage("Are you sure?");
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				me.finish();
+			}
+		});
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+            }
+        });
+		alert.show();
+	}
+	
 }
