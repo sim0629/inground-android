@@ -178,6 +178,8 @@ public class IngroundActivity extends MapActivity {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle("Throw");
 		View view = new View(this);
+		alert.setView(view);
+		final AlertDialog dialog = alert.create();
 		view.setBackgroundColor(Color.GRAY);
 		view.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
@@ -187,6 +189,7 @@ public class IngroundActivity extends MapActivity {
 					return true;
 				case MotionEvent.ACTION_UP:
 					sensorHelper.stop();
+					dialog.dismiss();
 					float[] velocity = sensorHelper.getVelocity();
 					Toast.makeText(me, String.format("%f\n%f\n%f", velocity[0], velocity[1], velocity[2]), Toast.LENGTH_LONG).show();
 					return true;
@@ -194,8 +197,7 @@ public class IngroundActivity extends MapActivity {
 				return false;
 			}
 		});
-		alert.setView(view);
-		alert.show();
+		dialog.show();
 	}
 	
 	private void doPoll() {
