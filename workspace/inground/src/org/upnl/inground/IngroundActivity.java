@@ -187,9 +187,8 @@ public class IngroundActivity extends MapActivity {
 					return true;
 				case MotionEvent.ACTION_UP:
 					sensorHelper.stop();
-					float[] a = sensorHelper.getTransformedAcceleration();
-					if(a == null) return true;
-					Toast.makeText(me, String.format("%f\n%f\n%f", a[0], a[1], a[2]), Toast.LENGTH_LONG).show();
+					float[] velocity = sensorHelper.getVelocity();
+					Toast.makeText(me, String.format("%f\n%f\n%f", velocity[0], velocity[1], velocity[2]), Toast.LENGTH_LONG).show();
 					return true;
 				}
 				return false;
@@ -254,14 +253,12 @@ public class IngroundActivity extends MapActivity {
     protected void onResume() {
     	super.onResume();
     	myLocationOverlay.enableMyLocation();
-    	myLocationOverlay.enableCompass();
     }
     
     @Override
     protected void onPause() {
     	super.onPause();
     	myLocationOverlay.disableMyLocation();
-    	myLocationOverlay.disableCompass();
     }
 
 	@Override

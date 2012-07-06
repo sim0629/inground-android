@@ -17,6 +17,7 @@ public class SensorHelper {
 	}
 	
 	public void start() {
+		velocity[0] = velocity[1] = velocity[2] = 0f;
 		registerAcceleration();
 		registerGravity();
 		registerGeomagnetic();
@@ -28,7 +29,12 @@ public class SensorHelper {
 		unregisterGeomagnetic();
 	}
 	
-	public float[] getTransformedAcceleration() {
+	private final float[] velocity = new float[3];
+	public float[] getVelocity() {
+		return velocity.clone();
+	}
+	
+	private float[] getTransformedAcceleration() {
 		float[] R = new float[9];
 		if(!SensorManager.getRotationMatrix(R, null, gravity, geomagnetic)) return null;
 		float[] transformedAcceleration = new float[] {
@@ -45,6 +51,9 @@ public class SensorHelper {
 	private SensorEventListener accelerationListener = new SensorEventListener() {
 		public void onSensorChanged(SensorEvent event) {
 			acceleration = new float[] { event.values[0], event.values[1], event.values[2] };
+			float[] ta = getTransformedAcceleration();
+			if(ta == null) return;
+			velocity[0] += ta[0]; velocity[1] += ta[1]; velocity[2] += ta[2];
 		}
 		public void onAccuracyChanged(Sensor sensor, int accuracy) {
 			// TODO
