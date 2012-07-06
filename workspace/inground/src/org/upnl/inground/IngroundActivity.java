@@ -175,29 +175,67 @@ public class IngroundActivity extends MapActivity {
 	}
 	
 	private void doThrow() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		alert.setTitle("Throw");
-		View view = new View(this);
-		alert.setView(view);
-		final AlertDialog dialog = alert.create();
-		view.setBackgroundColor(Color.GRAY);
-		view.setOnTouchListener(new OnTouchListener() {
-			public boolean onTouch(View v, MotionEvent event) {
-				switch(event.getAction()) {
-				case MotionEvent.ACTION_DOWN:
-					sensorHelper.start();
-					return true;
-				case MotionEvent.ACTION_UP:
-					sensorHelper.stop();
-					dialog.dismiss();
-					float[] velocity = sensorHelper.getVelocity();
-					Toast.makeText(me, String.format("%f\n%f\n%f", velocity[0], velocity[1], velocity[2]), Toast.LENGTH_LONG).show();
-					return true;
+		final GeoPoint gp = myLocationOverlay.getMyLocation();
+		if(gp == null) {
+			Toast.makeText(me, "Null Location", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		network.post(new GrabRequestData(gp.getLatitudeE6() / 1E6d, gp.getLongitudeE6() / 1E6d), new AsyncHttpResponseHandler() {
+			@Override
+			public void onSuccess(String response) {
+				GrabResponseData data = new Gson().fromJson(response, GrabResponseData.class);
+				if(data != null && data.success) {
+					if(ground.isInitialThrowing()) ground.addPath(gp);
+					AlertDialog.Builder alert = new AlertDialog.Builder(me);
+					alert.setTitle("Throw");
+					View view = new View(me);
+					alert.setView(view);
+					final AlertDialog dialog = alert.create();
+					view.setBackgroundColor(Color.GRAY);
+					view.setOnTouchListener(new OnTouchListener() {
+						public boolean onTouch(View v, MotionEvent event) {
+							switch(event.getAction()) {
+							case MotionEvent.ACTION_DOWN:
+								sensorHelper.start();
+								return true;
+							case MotionEvent.ACTION_UP:
+								sensorHelper.stop();
+								float[] velocity = sensorHelper.getVelocity();
+								if(velocity == null) return true;
+								network.post(new ThrowRequestData(velocity[0], velocity[1]), new AsyncHttpResponseHandler() {
+									@Override
+									public void onSuccess(String response) {
+										ThrowResponseData data = new Gson().fromJson(response, ThrowResponseData.class);
+										if(data != null) {
+											ground.addPath(data.location[0], data.location[1]);
+											if(!data.success) {
+												ground.preserveFailedPath();
+												ground.clearPath();
+											}
+											mapView.invalidate();
+										}
+									}
+									@Override
+									public void onFailure(Throwable error, String content) {
+										me.onFailureHelper(error, content, "Throw");
+									}
+								});
+								dialog.dismiss();
+								return true;
+							}
+							return false;
+						}
+					});
+					dialog.show();					
+				}else {
+					Toast.makeText(me, String.format("Grab %s", String.valueOf(data.success)), Toast.LENGTH_SHORT).show();
 				}
-				return false;
+			}
+			@Override
+			public void onFailure(Throwable error, String content) {
+				me.onFailureHelper(error, content, "Grab");
 			}
 		});
-		dialog.show();
 	}
 	
 	private void doPoll() {

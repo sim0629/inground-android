@@ -27,6 +27,8 @@ public class GroundOverlay extends Overlay {
 	
 	private ArrayList<Cell> cells = new ArrayList<Cell>();
 	private ArrayList<String> accounts = new ArrayList<String>();
+	private final ArrayList<GeoPoint> path = new ArrayList<GeoPoint>();
+	private final ArrayList<GeoPoint> failedPath = new ArrayList<GeoPoint>();
 	
 	public GroundOverlay() {
 	}
@@ -61,6 +63,31 @@ public class GroundOverlay extends Overlay {
 			paint.setAlpha(transparency);
 			canvas.drawRect(p.x - cellRadius, p.y - cellRadius, p.x + cellRadius, p.y + cellRadius, paint);
 		}
+		
+		paint.setStrokeWidth(5);
+		
+		if(path.size() > 1) {
+			paint.setColor(Color.BLACK);
+			float[] pts = new float[2 * path.size()];
+			for(int i = 0; i < path.size(); i++) {
+				Point p = new Point();
+				projection.toPixels(path.get(i), p);
+				pts[2 * i] = p.x; pts[2 * i + 1] = p.y;
+			}
+			canvas.drawLines(pts, paint);
+		}
+		
+		if(failedPath.size() > 1) {
+			paint.setColor(Color.RED);
+			float[] pts = new float[2 * failedPath.size()];
+			for(int i = 0; i < failedPath.size(); i++) {
+				Point p = new Point();
+				projection.toPixels(failedPath.get(i), p);
+				pts[2 * i] = p.x; pts[2 * i + 1] = p.y;
+			}
+			canvas.drawLines(pts, paint);
+		}
+		
 	}
 	
 	public void addCell(double lat, double lng) {
@@ -75,6 +102,28 @@ public class GroundOverlay extends Overlay {
 			who = accounts.size() - 1;
 		}
 		cells.get(index).setWho(who);
+	}
+	
+	public boolean isInitialThrowing() {
+		return path.size() == 0;
+	}
+	
+	public void addPath(double lat, double lng) {
+		addPath(new GeoPoint((int)(lat * 1E6), (int)(lng * 1E6)));
+		failedPath.clear();
+	}
+	
+	public void addPath(GeoPoint gp) {
+		if(path.size() > 3) path.clear(); // TODO 변이 무조건 세 개가 아닐 수 있음
+		path.add(gp);
+	}
+	
+	public void preserveFailedPath() {
+		failedPath.addAll(path);
+	}
+	
+	public void clearPath() {
+		path.clear();
 	}
 	
 }
