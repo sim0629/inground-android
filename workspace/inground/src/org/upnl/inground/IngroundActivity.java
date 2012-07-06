@@ -256,16 +256,22 @@ public class IngroundActivity extends MapActivity {
 				}else if(abstractData.kind.equals("finish")) {
 					FinishResponseData data = new Gson().fromJson(response, FinishResponseData.class);
 					started = false;
-					StringBuilder result = new StringBuilder("Finish\n");
-					result.append("======\n");
+					StringBuilder result = new StringBuilder();
 					for(FinishResponseData.FinishResultData r : data.result) {
 						result.append(r.account);
 						result.append(':');
 						result.append(r.nofcells);
 						result.append('\n');
 					}
-					result.append("======");
-					Toast.makeText(me, result.toString(), Toast.LENGTH_LONG).show();
+					AlertDialog.Builder alert = new AlertDialog.Builder(me);
+					alert.setTitle("Finish");
+					alert.setMessage(result.toString());
+					alert.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							// TODO
+						}
+					});
+					alert.show();
 				}else {
 					// TODO
 				}
