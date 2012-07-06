@@ -13,7 +13,7 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,8 +33,9 @@ public class IngroundActivity extends MapActivity {
 	private MapController mapController;
 	private MyLocationOverlay myLocationOverlay;
 	private boolean started;
+	private SensorHelper sensorHelper;
 	
-    @Override
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
@@ -56,11 +57,11 @@ public class IngroundActivity extends MapActivity {
         List<Overlay> mapOverlays = mapView.getOverlays();
         mapOverlays.add(ground = new GroundOverlay());
         myLocationOverlay = new MyLocationOverlay(this, mapView);
-        myLocationOverlay.enableMyLocation();
-        myLocationOverlay.enableCompass();
         mapOverlays.add(myLocationOverlay);
         
         network = new Network("http://neria.kr:16330/", this);
+        sensorHelper = new SensorHelper(this);
+        
     }
     
 	@Override
@@ -72,9 +73,15 @@ public class IngroundActivity extends MapActivity {
 				return true;
 			}
 		});
-		menu.add(Menu.NONE, 1, 1, "start").setOnMenuItemClickListener(new OnMenuItemClickListener() {
+		menu.add(Menu.NONE, 2, 2, "start").setOnMenuItemClickListener(new OnMenuItemClickListener() {
 			public boolean onMenuItemClick(MenuItem item) {
 				me.doStart();
+				return true;
+			}
+		});
+		menu.add(Menu.NONE, 3, 3, "throw").setOnMenuItemClickListener(new OnMenuItemClickListener() {
+			public boolean onMenuItemClick(MenuItem item) {
+				me.doThrow();
 				return true;
 			}
 		});
@@ -167,6 +174,31 @@ public class IngroundActivity extends MapActivity {
 		});
 	}
 	
+	private void doThrow() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle("Throw");
+		View view = new View(this);
+		view.setBackgroundColor(Color.GRAY);
+		view.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				switch(event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					sensorHelper.start();
+					return true;
+				case MotionEvent.ACTION_UP:
+					sensorHelper.stop();
+					float[] a = sensorHelper.getTransformedAcceleration();
+					if(a == null) return true;
+					Toast.makeText(me, String.format("%f\n%f\n%f", a[0], a[1], a[2]), Toast.LENGTH_LONG).show();
+					return true;
+				}
+				return false;
+			}
+		});
+		alert.setView(view);
+		alert.show();
+	}
+	
 	private void doPoll() {
 		if(!started) return;
 		network.post(new PollRequestData(), new AsyncHttpResponseHandler() {
@@ -238,11 +270,6 @@ public class IngroundActivity extends MapActivity {
 	}
 	
 	@Override
-	public void onConfigurationChanged(Configuration config){ 
-	    super.onConfigurationChanged(config);
-	}
-	
-	@Override
 	public void onBackPressed() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 		alert.setTitle("Exit");
@@ -253,7 +280,7 @@ public class IngroundActivity extends MapActivity {
 			}
 		});
 		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
+            public void onClick(DialogInterface dialog, int whichButton) {
             }
         });
 		alert.show();
