@@ -68,24 +68,26 @@ public class GroundOverlay extends Overlay {
 		
 		if(path.size() > 1) {
 			paint.setColor(Color.BLACK);
-			float[] pts = new float[2 * path.size()];
-			for(int i = 0; i < path.size(); i++) {
+			Point pp = new Point();
+			projection.toPixels(path.get(0), pp);
+			for(int i = 1; i < path.size(); i++) {
 				Point p = new Point();
 				projection.toPixels(path.get(i), p);
-				pts[2 * i] = p.x; pts[2 * i + 1] = p.y;
+				canvas.drawLine(pp.x, pp.y, p.x, p.y, paint);
+				pp = p;
 			}
-			canvas.drawLines(pts, paint);
 		}
 		
 		if(failedPath.size() > 1) {
 			paint.setColor(Color.RED);
-			float[] pts = new float[2 * failedPath.size()];
-			for(int i = 0; i < failedPath.size(); i++) {
+			Point pp = new Point();
+			projection.toPixels(failedPath.get(0), pp);
+			for(int i = 1; i < failedPath.size(); i++) {
 				Point p = new Point();
 				projection.toPixels(failedPath.get(i), p);
-				pts[2 * i] = p.x; pts[2 * i + 1] = p.y;
+				canvas.drawLine(pp.x, pp.y, p.x, p.y, paint);
+				pp = p;
 			}
-			canvas.drawLines(pts, paint);
 		}
 		
 	}

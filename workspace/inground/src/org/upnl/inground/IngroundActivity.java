@@ -201,8 +201,8 @@ public class IngroundActivity extends MapActivity {
 							case MotionEvent.ACTION_UP:
 								sensorHelper.stop();
 								float[] velocity = sensorHelper.getVelocity();
-								if(velocity == null) return true;
-								network.post(new ThrowRequestData(velocity[0], velocity[1]), new AsyncHttpResponseHandler() {
+								if(velocity == null || (velocity[0] == 0 && velocity[1] == 0)) return true;
+								network.post(new ThrowRequestData(velocity[1], velocity[0]), new AsyncHttpResponseHandler() {
 									@Override
 									public void onSuccess(String response) {
 										ThrowResponseData data = new Gson().fromJson(response, ThrowResponseData.class);
@@ -298,7 +298,8 @@ public class IngroundActivity extends MapActivity {
     @Override
     protected void onResume() {
     	super.onResume();
-    	myLocationOverlay.enableMyLocation();
+    	boolean b = myLocationOverlay.enableMyLocation();
+    	Toast.makeText(me, "gps : " + String.valueOf(b), Toast.LENGTH_SHORT).show();
     }
     
     @Override
