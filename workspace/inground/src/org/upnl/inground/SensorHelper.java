@@ -16,22 +16,24 @@ public class SensorHelper {
 		geomagneticSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 	}
 	
-	public void start() {
-		velocity[0] = velocity[1] = velocity[2] = 0f;
-		registerAcceleration();
-		registerGravity();
-		registerGeomagnetic();
+	private float startX, startY, stopX, stopY;
+	
+	public void start(float x, float y) {
+		startX = x;
+		startY = y;
 	}
 	
-	public void stop() {
-		unregisterAcceleration();
-		unregisterGravity();
-		unregisterGeomagnetic();
+	public void stop(float x, float y) {
+		stopX = x;
+		stopY = y;
 	}
 	
 	private final float[] velocity = new float[3];
 	public float[] getVelocity() {
-		return velocity.clone();
+		return new float[] {
+			startX - stopX,
+			stopY - startY
+		};
 	}
 	
 	private float[] getTransformedAcceleration() {

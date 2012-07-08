@@ -188,7 +188,7 @@ public class IngroundActivity extends MapActivity {
 					if(ground.isInitialThrowing()) ground.addPath(gp);
 					AlertDialog.Builder alert = new AlertDialog.Builder(me);
 					alert.setTitle("Throw");
-					View view = new View(me);
+					final View view = new View(me);
 					alert.setView(view);
 					final AlertDialog dialog = alert.create();
 					view.setBackgroundColor(Color.GRAY);
@@ -196,10 +196,10 @@ public class IngroundActivity extends MapActivity {
 						public boolean onTouch(View v, MotionEvent event) {
 							switch(event.getAction()) {
 							case MotionEvent.ACTION_DOWN:
-								sensorHelper.start();
+								sensorHelper.start(event.getX(), event.getY());
 								return true;
 							case MotionEvent.ACTION_UP:
-								sensorHelper.stop();
+								sensorHelper.stop(event.getX(), event.getY());
 								float[] velocity = sensorHelper.getVelocity();
 								if(velocity == null || (velocity[0] == 0 && velocity[1] == 0)) return true;
 								network.post(new ThrowRequestData(velocity[1], velocity[0]), new AsyncHttpResponseHandler() {

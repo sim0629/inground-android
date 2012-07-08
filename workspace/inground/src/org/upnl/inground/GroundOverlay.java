@@ -107,7 +107,7 @@ public class GroundOverlay extends Overlay {
 	}
 	
 	public boolean isInitialThrowing() {
-		return path.size() == 0;
+		return path.size() == 0 || path.size() > 3;
 	}
 	
 	public void addPath(double lat, double lng) {
